@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Кубик Рубіка 3D</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="theme-color" content="#529b89">
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
@@ -229,7 +235,7 @@
                 } else if (e.touches.length >= 2) {
                     controls.enabled = false;
 
-                    const touch = e.touches[e.touches.length - 1]; // Беремо найновіший доторкнутий палець
+                    const touch = e.touches[e.touches.length - 1];
                     activeTouchId = touch.identifier;
                     touchStartTime = Date.now();
 
@@ -288,7 +294,6 @@
 
             const userSwipeScreen = new THREE.Vector2(dx, dy).normalize();
             
-            // Якщо кубик ще крутиться, ми шукаємо точну позицію через світову матрицю
             const pos = new THREE.Vector3();
             hitCubie.getWorldPosition(pos);
             pos.round();
@@ -326,7 +331,6 @@
                 handleMove(bestMove);
             }
             
-            // Очищаємо сенсор після відпрацювання свайпу, щоб підготувати до наступного
             hitCubie = null;
             activeTouchId = null;
         }
@@ -410,7 +414,6 @@
             if (isPrime) angle = -angle;
 
             let currentProgress = 0;
-            // Адаптивна тривалість: якщо в черзі накопичилися рухи, анімація прискорюється
             const duration = moveQueue.length > 1 ? 6 : 10; 
 
             function animateRotation() {
@@ -463,6 +466,15 @@
             document.querySelectorAll('.theme-dot').forEach(dot => dot.classList.remove('active'));
             element.classList.add('active');
             document.body.style.background = THEMES[themeKey].gradient;
+        }
+
+        // ========== РЕЄСТРАЦІЯ SERVICE WORKER (ДЛЯ PWA / OFFLINE) ==========
+        if ('serviceWorker' in navigator) {
+            // Якщо ваш додаток лежить у підпапці rubik-cube-3d, шлях має бути: /rubik-cube-3d/sw.js
+            // Якщо в корені домену: /sw.js
+            navigator.serviceWorker.register('/rubik-cube-3d/sw.js')
+                .then(() => console.log('✅ Service Worker зареєстровано'))
+                .catch(err => console.error('❌ Помилка реєстрації SW:', err));
         }
 
         window.onload = init3D;
